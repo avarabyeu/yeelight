@@ -1,0 +1,11 @@
+sudo: false
+language: go
+go:
+  - 1.9
+
+script:
+  - make vendor build
+
+after_success:
+ - curl --request POST "https://goreportcard.com/checks" --data "repo=github.com/reportportal/commons-go"
+ - bash <(curl -s https://codecov.io/bash)

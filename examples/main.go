@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/avarabyeu/yeelight"
-	"github.com/prometheus/common/log"
-	"fmt"
-	"time"
 	"context"
+	"fmt"
+	"github.com/avarabyeu/yeelight"
+	"log"
+	"time"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	notifications, done, err := y.Listen()
 	checkError(err)
 	go func() {
-		<-time.After(time.Second)
+		<-time.After(time.Minute * 30)
 		done <- struct{}{}
 	}()
 	for n := range notifications {

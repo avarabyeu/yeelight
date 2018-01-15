@@ -1,15 +1,15 @@
 package yeelight
 
 import (
-	"net"
-	"errors"
 	"bufio"
-	"strings"
-	"net/http"
-	"fmt"
 	"encoding/json"
-	"time"
+	"errors"
+	"fmt"
 	"math/rand"
+	"net"
+	"net/http"
+	"strings"
+	"time"
 )
 
 const (
@@ -42,8 +42,8 @@ type (
 
 	// Notification represents notification response
 	Notification struct {
-		Method string        `json:"method"`
-		Params []interface{} `json:"params"`
+		Method string            `json:"method"`
+		Params map[string]string `json:"params"`
 	}
 
 	//Error struct represents error part of response
@@ -76,7 +76,7 @@ func Discover() (*Yeelight, error) {
 	}
 	rs := rsBuf[0:size]
 	addr := parseAddr(string(rs))
-	fmt.Printf("Device with ip %s found", addr)
+	fmt.Printf("Device with ip %s found\n", addr)
 	return New(addr), nil
 
 }
@@ -115,6 +115,7 @@ func (y *Yeelight) Listen() (<-chan *Notification, chan<- struct{}, error) {
 				data, err := connReader.ReadString('\n')
 				if nil == err {
 					var rs Notification
+					fmt.Println(data)
 					json.Unmarshal([]byte(data), &rs)
 					select {
 					case notifCh <- &rs:
@@ -133,7 +134,7 @@ func (y *Yeelight) Listen() (<-chan *Notification, chan<- struct{}, error) {
 
 // GetProp method is used to retrieve current property of smart LED.
 func (y *Yeelight) GetProp(values ...interface{}) ([]interface{}, error) {
-	r, err := y.executeCommand("get_prop", values)
+	r, err := y.executeCommand("get_prop", values...)
 	if nil != err {
 		return nil, err
 	}
@@ -175,6 +176,7 @@ func (y *Yeelight) execute(cmd *Command) (*CommandResult, error) {
 	if nil != err {
 		return nil, fmt.Errorf("cannot open connection to %s. %s", y.addr, err)
 	}
+	time.Sleep(time.Second)
 	conn.SetReadDeadline(time.Now().Add(timeout))
 
 	//write request/command
@@ -186,7 +188,6 @@ func (y *Yeelight) execute(cmd *Command) (*CommandResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot read command result %s", err)
 	}
-
 	var rs CommandResult
 	err = json.Unmarshal([]byte(res), &rs)
 	if nil != err {

@@ -5,21 +5,16 @@ BUILD_DATE = `date +%FT%T%z`
 
 GO = go
 BINARY_DIR=bin
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-PACKAGES_NOVENDOR = $(shell glide novendor)
 
 BUILD_DEPS:= github.com/alecthomas/gometalinter
 
-.PHONY: vendor test build
+.PHONY: test build
 
 help:
 	@echo "build      - go build"
 	@echo "test       - go test"
 	@echo "checkstyle - gofmt+golint+misspell"
 
-vendor:
-	## Requires glide!
-	glide install
 
 get-build-deps:
 	$(GO) get $(BUILD_DEPS)
@@ -32,11 +27,11 @@ checkstyle:
 	gometalinter --vendor ./... --fast --disable=gas --disable=errcheck --disable=gotype --deadline 10m
 
 fmt:
-	gofmt -l -w -s ${GOFILES_NOVENDOR}
+	gofmt -l -w -s .
 
 # Builds the project
 build: checkstyle test
-	$(GO) build $(PACKAGES_NOVENDOR)
+	$(GO) build .
 
 
 clean:
