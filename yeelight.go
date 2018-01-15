@@ -166,10 +166,12 @@ func (y *Yeelight) newCommand(name string, params []interface{}) *Command {
 	}
 }
 
+//executeCommand executes command with provided parameters
 func (y *Yeelight) executeCommand(name string, params ...interface{}) (*CommandResult, error) {
 	return y.execute(y.newCommand(name, params))
 }
 
+//executeCommand executes command
 func (y *Yeelight) execute(cmd *Command) (*CommandResult, error) {
 
 	conn, err := net.Dial("tcp", y.addr)
