@@ -4,7 +4,7 @@ go:
   - 1.9
 
 script:
-  - make vendor build
+  - make get-build-deps build
 
 after_success:
  - curl --request POST "https://goreportcard.com/checks" --data "repo=github.com/avarabyeu/yeelight"
