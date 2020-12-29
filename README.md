@@ -1,8 +1,3 @@
-[![Build Status](https://travis-ci.org/avarabyeu/yeelight.svg?branch=master)](https://travis-ci.org/avarabyeu/yeelight)
-[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/avarabyeu/yeelight/master/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/avarabyeu/yeelight)](https://goreportcard.com/report/github.com/avarabyeu/yeelight)
-[![Code Coverage](https://codecov.io/gh/avarabyeu/yeelight/branch/master/graph/badge.svg)](https://codecov.io/gh/avarabyeu/yeelight)
-
 # yeelight
 Golang API for [Yeelight](yeelight.com)
 
