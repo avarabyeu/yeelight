@@ -5,11 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/color"
 	"math/rand"
 	"net"
-	"net/http"
-	"strings"
 	"time"
 )
 
@@ -59,39 +56,6 @@ type (
 		Random  *rand.Rand
 	}
 )
-
-//Power state toggle for light
-func (y Yeelight) Power() error {
-	_, err := y.executeCommand("toggle")
-
-	return err
-}
-
-func (y Yeelight) Color(color string) error {
-	c, _ := parseHexColorFast(color)
-
-	intColor := (256 * 256 * int(c.R)) + (256 * int(c.G)) + int(c.B)
-
-	_, err := y.executeCommand("set_rgb", intColor)
-
-	return err
-}
-
-func (y Yeelight) Brightness(brightness int) error {
-
-	_, err := y.executeCommand("set_bright", brightness)
-	return err
-}
-
-func (y Yeelight) Timer(minutes int) error {
-	_, err := y.executeCommand("cron_add", 0, minutes)
-	return err
-}
-
-func (y Yeelight) StopTimer() error {
-	_, err := y.executeCommand("cron_del", 0)
-	return err
-}
 
 //Discover discovers device in local network via ssdp
 func Discover() (*Yeelight, error) {
@@ -166,132 +130,12 @@ func (y *Yeelight) Listen() (<-chan *Notification, chan<- struct{}, error) {
 }
 
 // GetProp method is used to retrieve current property of smart LED.
-func (y *Yeelight) GetProp(values ...interface{}) ([]interface{}, error) {
-	r, err := y.executeCommand("get_prop", values...)
+func (d *Device) GetProp(values ...interface{}) ([]interface{}, error) {
+	r, err := d.executeCommand("get_prop", values...)
 
 	if nil != err {
 		return nil, err
 	}
 
 	return r.Result, nil
-}
-
-func (y *Yeelight) randID() int {
-	i := y.Random.Intn(100)
-
-	return i
-}
-
-func (y *Yeelight) newCommand(name string, params []interface{}) *Command {
-	return &Command{
-		Method: name,
-		ID:     y.randID(),
-		Params: params,
-	}
-}
-
-//executeCommand executes command with provided parameters
-func (y *Yeelight) executeCommand(name string, params ...interface{}) (*CommandResult, error) {
-	return y.execute(y.newCommand(name, params))
-}
-
-//executeCommand executes command
-func (y *Yeelight) execute(cmd *Command) (*CommandResult, error) {
-
-	conn, err := net.Dial("tcp", y.Address)
-	if nil != err {
-		return nil, fmt.Errorf("cannot open connection to %s. %s", y.Address, err)
-	}
-
-	time.Sleep(time.Second)
-	conn.SetReadDeadline(time.Now().Add(timeout))
-
-	//write request/command
-	b, _ := json.Marshal(cmd)
-	fmt.Println(fmt.Sprintf("%v", string(b)))
-
-	fmt.Fprint(conn, string(b)+crlf)
-
-	//wait and read for response
-	res, err := bufio.NewReader(conn).ReadString('\n')
-	if err != nil {
-		return nil, fmt.Errorf("cannot read command result %s", err)
-	}
-
-	var rs CommandResult
-	err = json.Unmarshal([]byte(res), &rs)
-
-	fmt.Println(string([]byte(res)))
-
-	if nil != err {
-		return nil, fmt.Errorf("cannot parse command result %s", err)
-	}
-
-	if nil != rs.Error {
-		return nil, fmt.Errorf("command execution error. Code: %d, Message: %s", rs.Error.Code, rs.Error.Message)
-	}
-
-	return &rs, nil
-}
-
-//parseAddr parses address from ssdp response
-func parseAddr(msg string) string {
-	if strings.HasSuffix(msg, crlf) {
-		msg = msg + crlf
-	}
-
-	resp, err := http.ReadResponse(bufio.NewReader(strings.NewReader(msg)), nil)
-
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-
-	defer resp.Body.Close()
-
-	return strings.TrimPrefix(resp.Header.Get("LOCATION"), "yeelight://")
-}
-
-//closeConnection closes network connection
-func closeConnection(c net.Conn) {
-	if nil != c {
-		c.Close()
-	}
-}
-
-var errInvalidFormat = errors.New("invalid format")
-
-func parseHexColorFast(s string) (c color.RGBA, err error) {
-	c.A = 0xff
-
-	if s[0] != '#' {
-		return c, errInvalidFormat
-	}
-
-	hexToByte := func(b byte) byte {
-		switch {
-		case b >= '0' && b <= '9':
-			return b - '0'
-		case b >= 'a' && b <= 'f':
-			return b - 'a' + 10
-		case b >= 'A' && b <= 'F':
-			return b - 'A' + 10
-		}
-		err = errInvalidFormat
-		return 0
-	}
-
-	switch len(s) {
-	case 7:
-		c.R = hexToByte(s[1])<<4 + hexToByte(s[2])
-		c.G = hexToByte(s[3])<<4 + hexToByte(s[4])
-		c.B = hexToByte(s[5])<<4 + hexToByte(s[6])
-	case 4:
-		c.R = hexToByte(s[1]) * 17
-		c.G = hexToByte(s[2]) * 17
-		c.B = hexToByte(s[3]) * 17
-	default:
-		err = errInvalidFormat
-	}
-	return
 }
