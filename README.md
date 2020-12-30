@@ -1,16 +1,13 @@
 # yeelight
 Golang API for [Yeelight](yeelight.com)
 
-## Overview
-Yeelight is simple command line tool and Golang implementation API of Yeelight protocol 
+Yeelight is simple command line tool and Golang implementation API of Yeelight protocol
 with notification listening support
 
 ## Installation
-Make sure you have a working Go environment. [See Golang install instructions]()http://golang.org/doc/install.html)
-
 To install, run:
 ```sh
-go get github.com/avarabyeu/yeelight
+go get github.com/newbits/yeelight
 ```
 
 ## Usage
