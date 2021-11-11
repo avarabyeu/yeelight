@@ -134,7 +134,7 @@ func (y *Yeelight) Listen() (<-chan *Notification, chan<- struct{}, error) {
 
 // GetProp method is used to retrieve current property of smart LED.
 func (y *Yeelight) GetProp(values ...interface{}) ([]interface{}, error) {
-	r, err := y.executeCommand("get_prop", values...)
+	r, err := y.ExecuteCommand("get_prop", values...)
 	if nil != err {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (y *Yeelight) SetPower(on bool) error {
 	} else {
 		status = "off"
 	}
-	_, err := y.executeCommand("set_power", status)
+	_, err := y.ExecuteCommand("set_power", status)
 	return err
 }
 
@@ -166,12 +166,12 @@ func (y *Yeelight) newCommand(name string, params []interface{}) *Command {
 	}
 }
 
-//executeCommand executes command with provided parameters
-func (y *Yeelight) executeCommand(name string, params ...interface{}) (*CommandResult, error) {
+//ExecuteCommand executes command with provided parameters
+func (y *Yeelight) ExecuteCommand(name string, params ...interface{}) (*CommandResult, error) {
 	return y.execute(y.newCommand(name, params))
 }
 
-//executeCommand executes command
+//ExecuteCommand executes command
 func (y *Yeelight) execute(cmd *Command) (*CommandResult, error) {
 
 	conn, err := net.Dial("tcp", y.addr)
